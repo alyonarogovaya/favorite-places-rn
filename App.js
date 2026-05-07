@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AllPlacesScreen from './screens/AllPlacesScreen';
 import AddPlaceScreen from './screens/AddPlaceScreen';
-import IconButton from './components/Places/UI/IconButton';
+import IconButton from './components/UI/IconButton';
 import { Colors } from './constants/colors';
 
 const Stack = createNativeStackNavigator();
