@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Alert,
   AppState,
-  Button,
   Image,
   Linking,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
   PermissionStatus,
 } from 'expo-image-picker';
 import { Colors } from '../../constants/colors';
+import OutlinedButton from '../UI/OutlinedButton';
 
 function ImagePicker() {
   const [cameraPermissionsInfo, requestPermission] = useCameraPermissions();
@@ -75,7 +75,9 @@ function ImagePicker() {
           <Text>No image taken yet.</Text>
         )}
       </View>
-      <Button title="Take image" onPress={takeImage} />
+      <OutlinedButton icon="camera" onPress={takeImage}>
+        Take Image
+      </OutlinedButton>
     </View>
   );
 }
