@@ -1,5 +1,5 @@
-import { Alert, AppState, StyleSheet, Text, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { Alert, AppState, StyleSheet, Text, View, Linking } from 'react-native';
+import { useEffect } from 'react';
 import OutlinedButton from '../UI/OutlinedButton';
 import { Colors } from '../../constants/colors';
 import {
@@ -7,22 +7,15 @@ import {
   useForegroundPermissions,
   PermissionStatus,
 } from 'expo-location';
-import { LatLng, LeafletView } from 'react-native-leaflet-view';
 import MapPreview from './MapPreview';
-import {
-  useNavigation,
-  useRoute,
-  useIsFocused,
-} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { getAddress } from '../../utils/location';
 
-function LocationPicker() {
+function LocationPicker({ onPickLocation, location }) {
   const [locationPermissionInfo, requestPermission] =
     useForegroundPermissions();
-  const [pickedLocation, setPickedLocation] = useState();
 
-  const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const route = useRoute();
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (state) => {
@@ -30,20 +23,13 @@ function LocationPicker() {
         await requestPermission();
       }
     });
-
     return () => subscription.remove();
   }, []);
 
-  useEffect(() => {
-    if (isFocused && route.params) {
-      const mapPickedLocation = {
-        latitude: route.params.pickedLocation.lat,
-        longitude: route.params.pickedLocation.lng,
-      };
-
-      setPickedLocation(mapPickedLocation);
-    }
-  }, [route, isFocused]);
+  const handlePickedLocation = async (coords) => {
+    const address = await getAddress(coords.latitude, coords.longitude);
+    onPickLocation({ ...coords, address });
+  };
 
   const verifyPermission = async () => {
     if (!locationPermissionInfo) return false;
@@ -70,38 +56,45 @@ function LocationPicker() {
 
   const getLocation = async () => {
     const hasPermission = await verifyPermission();
-
-    if (!hasPermission) {
-      return;
-    }
+    if (!hasPermission) return;
 
     const location = await getCurrentPositionAsync();
-    setPickedLocation({
+    handlePickedLocation({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     });
   };
 
   const pickOnMap = () => {
-    navigation.navigate('Map');
+    navigation.navigate('Map', {
+      // Pass a callback — MapScreen calls this and goes back
+      onLocationPicked: (pickedLocation) => {
+        handlePickedLocation({
+          latitude: pickedLocation.lat,
+          longitude: pickedLocation.lng,
+        });
+      },
+    });
   };
 
   return (
     <View>
       <View style={styles.mapPreview}>
-        {pickedLocation ? (
+        {location ? (
           <MapPreview
-            latitude={pickedLocation.latitude}
-            longitude={pickedLocation.longitude}
+            latitude={location.latitude}
+            longitude={location.longitude}
           />
         ) : (
           <Text>No location taken yet.</Text>
         )}
       </View>
+
       <View style={styles.actions}>
         <OutlinedButton icon="location" onPress={getLocation}>
           Locate user
         </OutlinedButton>
+
         <OutlinedButton icon="map" onPress={pickOnMap}>
           Pick on Map
         </OutlinedButton>

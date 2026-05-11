@@ -3,7 +3,7 @@ import { Alert, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import IconButton from '../components/UI/IconButton';
 
-function MapScreen({ navigation }) {
+function MapScreen({ navigation, route }) {
   const [selectedLocation, setSelectedLocation] = useState();
 
   const region = {
@@ -29,8 +29,11 @@ function MapScreen({ navigation }) {
       return;
     }
 
-    navigation.navigate('Add place', { pickedLocation: selectedLocation });
-  }, [navigation, selectedLocation]);
+    if (route.params?.onLocationPicked) {
+      route.params.onLocationPicked(selectedLocation);
+    }
+    navigation.goBack();
+  }, [navigation, selectedLocation, route.params]);
 
   useLayoutEffect(() => {
     navigation.setOptions({

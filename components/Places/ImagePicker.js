@@ -16,9 +16,8 @@ import {
 import { Colors } from '../../constants/colors';
 import OutlinedButton from '../UI/OutlinedButton';
 
-function ImagePicker() {
+function ImagePicker({ onTakeImage, image }) {
   const [cameraPermissionsInfo, requestPermission] = useCameraPermissions();
-  const [pickedImage, setPickedImage] = useState();
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (state) => {
@@ -56,25 +55,29 @@ function ImagePicker() {
   const takeImage = async () => {
     const hasPermission = await verifyPermissions();
     if (!hasPermission) return;
-    const image = await launchCameraAsync({
+
+    const imageResult = await launchCameraAsync({
       allowsEditing: true,
       quality: 0.5,
     });
 
-    if (image.canceled) return;
+    if (imageResult.canceled) return;
 
-    setPickedImage(image.assets[0]);
+    const image = imageResult.assets[0];
+
+    onTakeImage(image);
   };
 
   return (
     <View>
       <View style={styles.imagePreview}>
-        {pickedImage ? (
-          <Image style={styles.image} source={{ uri: pickedImage.uri }} />
+        {image ? (
+          <Image style={styles.image} source={{ uri: image.uri }} />
         ) : (
           <Text>No image taken yet.</Text>
         )}
       </View>
+
       <OutlinedButton icon="camera" onPress={takeImage}>
         Take Image
       </OutlinedButton>
