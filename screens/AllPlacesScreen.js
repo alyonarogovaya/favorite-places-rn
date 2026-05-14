@@ -1,16 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import PlacesList from '../components/Places/PlacesList';
+import { fetchPlaces } from '../utils/database';
 
 function AllPlacesScreen({ route }) {
   const [loadedPlaces, setLoadedPlaces] = useState([]);
-
   const isFocused = useIsFocused();
+
   useEffect(() => {
-    if (isFocused && route.params) {
-      setLoadedPlaces((currPlaces) => [...currPlaces, route.params.place]);
+    async function loadPlaces() {
+      try {
+        const places = await fetchPlaces();
+        setLoadedPlaces(places);
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }, [isFocused, route]);
+
+    if (isFocused) {
+      loadPlaces();
+    }
+  }, [isFocused]);
 
   return <PlacesList places={loadedPlaces} />;
 }

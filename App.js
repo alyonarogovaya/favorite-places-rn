@@ -6,10 +6,30 @@ import AddPlaceScreen from './screens/AddPlaceScreen';
 import IconButton from './components/UI/IconButton';
 import { Colors } from './constants/colors';
 import MapScreen from './screens/MapScreen';
+import { useEffect } from 'react';
+import { init } from './utils/database';
+import * as SplashScreen from 'expo-splash-screen';
+import PlaceDetailsScreen from './screens/PlaceDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
+  useEffect(() => {
+    async function initDatabase() {
+      try {
+        await init();
+      } catch (error) {
+        console.log('DB init failed:', error);
+      } finally {
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    initDatabase();
+  }, []);
+
   return (
     <>
       <NavigationContainer>
@@ -28,7 +48,7 @@ export default function App() {
             name="All places"
             component={AllPlacesScreen}
             options={({ navigation }) => ({
-              title: 'Your favorite places',
+              title: 'All places',
               headerRight: ({ tintColor }) => (
                 <IconButton
                   icon="add"
@@ -49,6 +69,13 @@ export default function App() {
             }}
           />
           <Stack.Screen name="Map" component={MapScreen} />
+          <Stack.Screen
+            name="Place details"
+            component={PlaceDetailsScreen}
+            options={{
+              title: 'Loading place...',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <StatusBar style="dark" />

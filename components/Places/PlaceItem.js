@@ -9,7 +9,7 @@ function PlaceItem({ place, onPress }) {
       style={({ pressed }) => [styles.item, pressed && styles.pressed]}
       onPress={onPress}
     >
-      <Image style={styles.image} source={{ uri: imageUri.uri }} />
+      <Image style={styles.image} source={{ uri: imageUri }} />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.address}>{address}</Text>
