@@ -8,7 +8,10 @@ function AddPlaceScreen({ navigation }) {
     } catch (err) {
       console.error(err);
     }
-    navigation.navigate('All places');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'All places' }],
+    });
   };
 
   return <PlaceForm onCreatePlace={createPlace} />;

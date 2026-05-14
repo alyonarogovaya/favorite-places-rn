@@ -59,3 +59,11 @@ export async function fetchPlaceDetails(id) {
 
   return place;
 }
+
+export async function deletePlace(id) {
+  const db = await getDatabase();
+
+  const result = await db.runAsync('DELETE FROM places WHERE id = ?', [id]);
+
+  return result;
+}

@@ -4,10 +4,12 @@ import MapView, { Marker } from 'react-native-maps';
 import IconButton from '../components/UI/IconButton';
 
 function MapScreen({ navigation, route }) {
-  const initialLocation = route.params && {
-    lat: route.params.initialLat,
-    lng: route.params.initialLng,
-  };
+  const initialLocation = route.params
+    ? {
+        lat: route.params.initialLat,
+        lng: route.params.initialLng,
+      }
+    : null;
 
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
 
@@ -35,12 +37,14 @@ function MapScreen({ navigation, route }) {
       );
       return;
     }
-
-    if (route.params?.onLocationPicked) {
-      route.params.onLocationPicked(selectedLocation);
-    }
-    navigation.goBack();
-  }, [navigation, selectedLocation, route.params]);
+    navigation.navigate({
+      name: 'Add place',
+      params: {
+        pickedLocation: selectedLocation,
+      },
+      merge: true,
+    });
+  }, [navigation, selectedLocation]);
 
   useLayoutEffect(() => {
     if (initialLocation) return;

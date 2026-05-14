@@ -1,21 +1,16 @@
-import { Image, ScrollView, StyleSheet, View, Text } from 'react-native';
+import { Image, ScrollView, StyleSheet, View, Text, Alert } from 'react-native';
 import OutlinedButton from '../components/UI/OutlinedButton';
 import { Colors } from '../constants/colors';
 import { useEffect, useState } from 'react';
-import { fetchPlaceDetails } from '../utils/database';
+import { deletePlace, fetchPlaceDetails } from '../utils/database';
 import { useNavigation } from '@react-navigation/native';
+import IconButton from '../components/UI/IconButton';
 
 function PlaceDetailsScreen({ route }) {
   const [selectedPlace, setSelectedPlace] = useState();
   const navigation = useNavigation();
 
   const placeId = route.params.placeId;
-  const showOnMap = () => {
-    navigation.navigate('Map', {
-      initialLat: selectedPlace.lat,
-      initialLng: selectedPlace.lng,
-    });
-  };
 
   useEffect(() => {
     async function loadPlace() {
@@ -32,6 +27,35 @@ function PlaceDetailsScreen({ route }) {
     loadPlace();
   }, [placeId]);
 
+  const showOnMap = () => {
+    navigation.navigate('Map', {
+      initialLat: selectedPlace.lat,
+      initialLng: selectedPlace.lng,
+    });
+  };
+
+  const deleteSelectedPlace = () => {
+    Alert.alert('Delete place', 'Are you sure you want to delete this place?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deletePlace(selectedPlace.id);
+
+            navigation.goBack();
+          } catch (err) {
+            console.error(err);
+          }
+        },
+      },
+    ]);
+  };
+
   if (!selectedPlace) {
     return (
       <View style={styles.fallback}>
@@ -42,14 +66,25 @@ function PlaceDetailsScreen({ route }) {
 
   return (
     <ScrollView>
-      <Image source={{ uri: selectedPlace.imageUri }} style={styles.image} />
-      <View style={styles.locationContainer}>
-        <View style={styles.addressContainer}>
-          <Text style={styles.address}>{selectedPlace.address}</Text>
+      <View style={styles.container}>
+        <Image source={{ uri: selectedPlace.imageUri }} style={styles.image} />
+        <View style={styles.locationContainer}>
+          <View style={styles.addressContainer}>
+            <Text style={styles.address}>{selectedPlace.address}</Text>
+          </View>
+          <OutlinedButton icon="map" onPress={showOnMap}>
+            View on map
+          </OutlinedButton>
         </View>
-        <OutlinedButton icon="map" onPress={showOnMap}>
-          View on map
-        </OutlinedButton>
+        <View style={styles.actionsContainer}>
+          <IconButton
+            icon="trash"
+            size={24}
+            color={Colors.error800}
+            buttonStyles={styles.iconButton}
+            onPress={deleteSelectedPlace}
+          />
+        </View>
       </View>
     </ScrollView>
   );
@@ -80,5 +115,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  container: {
+    justifyContent: 'space-between',
+    gap: 24,
+  },
+  actionsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconButton: {
+    display: 'flex',
+    width: 50,
+    padding: 12,
+    backgroundColor: Colors.error400,
   },
 });
