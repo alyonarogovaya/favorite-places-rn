@@ -25,12 +25,15 @@ function PlaceDetailsScreen({ route }) {
       }
     }
     loadPlace();
-  }, [placeId]);
+  }, [placeId, navigation]);
 
   const showOnMap = () => {
     navigation.navigate('Map', {
-      initialLat: selectedPlace.lat,
-      initialLng: selectedPlace.lng,
+      initialLocation: {
+        lat: selectedPlace.lat,
+        lng: selectedPlace.lng,
+      },
+      viewOnly: true,
     });
   };
 

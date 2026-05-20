@@ -11,20 +11,11 @@ import MapPreview from './MapPreview';
 import { useNavigation } from '@react-navigation/native';
 import { getAddress } from '../../utils/location';
 
-function LocationPicker({ onPickLocation, location }) {
+function LocationPicker({ onPickLocation, location, enteredData }) {
   const [locationPermissionInfo, requestPermission] =
     useForegroundPermissions();
 
   const navigation = useNavigation();
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', async (state) => {
-      if (state === 'active') {
-        await requestPermission();
-      }
-    });
-    return () => subscription.remove();
-  }, []);
 
   const handlePickedLocation = async (coords) => {
     const address = await getAddress(coords.latitude, coords.longitude);
@@ -67,15 +58,20 @@ function LocationPicker({ onPickLocation, location }) {
 
   const pickOnMap = () => {
     navigation.navigate('Map', {
-      // Pass a callback — MapScreen calls this and goes back
-      onLocationPicked: (pickedLocation) => {
-        handlePickedLocation({
-          latitude: pickedLocation.lat,
-          longitude: pickedLocation.lng,
-        });
-      },
+      returnScreen: 'Add place',
+      initialLocation: location,
+      enteredData,
     });
   };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (state) => {
+      if (state === 'active') {
+        await requestPermission();
+      }
+    });
+    return () => subscription.remove();
+  }, [requestPermission]);
 
   return (
     <View>
@@ -120,5 +116,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+    marginBottom: 16,
   },
 });
